@@ -78,7 +78,7 @@ def run(argv)
     fqr_file = File.open(fqr)
   end
   $logger.info("I found #{num_reads} of reads.")
-  rand_array = (0...num_reads).to_a.sort { rand() - 0.5}[0..options[:n]].sort
+  rand_array = (0...num_reads-1).to_a.sort { rand() - 0.5}[0..options[:n]].sort
   subf = File.open(out_prefix + "_fwd.fq",'w')
   subr = File.open(out_prefix + "_rev.fq",'w')
   rec_no = 0
