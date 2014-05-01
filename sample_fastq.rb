@@ -69,11 +69,11 @@ def run(argv)
   fqr = argv[1]
   out_prefix = argv[2]
   if fqf =~ /\.gz$/
-    num_reads = `zcat #{fqf} | wc -l`.to_i
+    num_reads = `zcat #{fqf} | wc -l`.to_i/4
     fqf_file = Zlib::GzipReader.new(File.open(fqf))
     fqr_file = Zlib::GzipReader.new(File.open(fqr))
   else
-    num_reads = `wc -l #{fqf}`.to_i
+    num_reads = `wc -l #{fqf}`.to_i/4
     fqf_file = File.open(fqf)
     fqr_file = File.open(fqr)
   end
