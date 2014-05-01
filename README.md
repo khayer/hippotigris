@@ -3,7 +3,7 @@ hippotigris
 
 A collection used for the SRA normalization scripts.
 
-## Sampling fastq files
+### Sampling fastq files
 
     Usage: sample_fastq.rb [options] fwd.fq[.gz] rev.fq[.gz] out_prefix
 
