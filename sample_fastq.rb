@@ -91,7 +91,7 @@ def run(argv)
   subf = File.open(out_prefix + "_fwd.fq",'w')
   subr = File.open(out_prefix + "_rev.fq",'w')
   rec_no = 0
-  rand_array.each do |ele|
+  while !fqf_file.eof?
     if rand() > cut_off
       for i in (0..3)
         fqf_file.readline
