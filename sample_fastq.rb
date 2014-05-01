@@ -48,7 +48,9 @@ def setup_options(args)
       :REQUIRED,String,
       "Give range to randomize N, example: '10,20'") do |n|
       n = n.split(",").map { |e| e.to_i  }
-      options[:n] = rand(n[0]..n[1])
+      n = rand(n[0]..n[1])
+      $logger.info("Your randomized n is #{n}.")
+      options[:n] = n
     end
 
     opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
