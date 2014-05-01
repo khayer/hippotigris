@@ -87,24 +87,25 @@ def run(argv)
     fqr_file = File.open(fqr)
   end
   $logger.info("I found #{num_reads} of reads.")
-  rand_array = (0...num_reads).to_a.sort { rand() - 0.5}[0..options[:n]].sort
+  cut_off = 1.0/(num_reads.to_f/options[:n])
   subf = File.open(out_prefix + "_fwd.fq",'w')
   subr = File.open(out_prefix + "_rev.fq",'w')
   rec_no = 0
   rand_array.each do |ele|
-    while rec_no < ele
+    if rand() > cut_off
       for i in (0..3)
         fqf_file.readline
         fqr_file.readline
+      end
+    else
+      for i in (0..3)
+        subf.puts fqf_file.readline
+        subr.puts fqr_file.readline
         rec_no += 1
       end
     end
-    for i in (0..3)
-      subf.puts fqf_file.readline
-      subr.puts fqr_file.readline
-      rec_no += 1
-    end
   end
+  $logger.info("Total number of reads: #{rec_no}")
 end
 
 if __FILE__ == $0
