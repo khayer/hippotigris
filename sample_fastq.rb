@@ -93,6 +93,7 @@ def run(argv)
     for i in (0..3)
       subf.puts fqf_file.readline
       subr.puts fqr_file.readline
+      rec_no += 1
     end
   end
 end
