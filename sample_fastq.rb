@@ -94,7 +94,6 @@ def run(argv)
       subf.puts fqf_file.readline
       subr.puts fqr_file.readline
     end
-    rec_no += 1
   end
 end
 
