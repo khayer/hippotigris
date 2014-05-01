@@ -4,6 +4,7 @@ require 'logger'
 require 'zlib'
 
 $logger = Logger.new(STDOUT)
+VERSION = "v.0.0.1"
 
 original_formatter = Logger::Formatter.new
 
@@ -53,8 +54,13 @@ def setup_options(args)
       options[:n] = n
     end
 
-    opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    opts.on("-v", "--verbose", "Run verbosely") do |v|
       options[:log_level] = "info"
+    end
+
+    opts.on("-e","--version", "Print version") do |v|
+      STDOUT.puts VERSION
+      exit()
     end
 
     opts.on("-d", "--debug", "Run in debug mode") do |v|

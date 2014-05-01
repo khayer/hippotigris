@@ -11,7 +11,6 @@ A collection used for the SRA normalization scripts.
 
         -n, --number [NUMBER]            How many reads to sample?, Default: 1Mio
         -r, --randomize_n [NUMBER]       Give range to randomize N, example: '10,20'
-        -v, --[no-]verbose               Run verbosely
+        -v, --verbose                    Run verbosely
+        -e, --version                    Print version
         -d, --debug                      Run in debug mode
-
-
