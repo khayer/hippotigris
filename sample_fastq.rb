@@ -67,7 +67,7 @@ def run(argv)
   $logger.debug(argv)
   fqf = argv[0]
   fqr = argv[1]
-  out_prefix = argv[3]
+  out_prefix = argv[2]
   if fqf =~ /\.gz$/
     num_reads = `zcat #{fqf} | wc -l`.to_i
     fqf_file = Zlib::GzipReader.new(File.open(fqf))
