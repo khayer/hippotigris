@@ -44,6 +44,13 @@ def setup_options(args)
       options[:n] = n
     end
 
+    opts.on("-r", "--randomize_n [NUMBER]",
+      :REQUIRED,String,
+      "Give range to randomize N, example: '10,20'") do |n|
+      n = n.split(",").map { |e| e.to_i  }
+      options[:n] = rand(n[0]..n[1])
+    end
+
     opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
       options[:log_level] = "info"
     end
