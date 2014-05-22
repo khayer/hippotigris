@@ -31,26 +31,17 @@ def setup_logger(loglevel)
 end
 
 def setup_options(args)
-  options = {:n =>  1000000}
+  options = {:n =>  75}
 
   opt_parser = OptionParser.new do |opts|
-    opts.banner = "Usage: #{$0} [options] fwd.fq[.gz] rev.fq[.gz] out_prefix"
+    opts.banner = "Usage: #{$0} [options] in.fq[.gz] out.fq"
     opts.separator ""
-    opts.separator "Samples N=1Mio reads from paired end fastq files."
+    opts.separator "Trim all reads to 75 bases"
 
     opts.separator ""
     opts.on("-n", "--number [NUMBER]",
       :REQUIRED,Integer,
-      "How many reads to sample?, Default: 1Mio") do |n|
-      options[:n] = n
-    end
-
-    opts.on("-r", "--randomize_n [NUMBER]",
-      :REQUIRED,String,
-      "Give range to randomize N, example: '10,20'") do |n|
-      n = n.split(",").map { |e| e.to_i  }
-      n = rand(n[0]..n[1])
-      $logger.info("Your randomized n is #{n}.")
+      "How many bases to trim?, Default: 75 bases") do |n|
       options[:n] = n
     end
 
@@ -71,7 +62,7 @@ def setup_options(args)
 
   args = ["-h"] if args.length == 0
   opt_parser.parse!(args)
-  raise "Please specify the input files!" if args.length != 3
+  raise "Please specify the input files!" if args.length != 2
   options
 end
 
@@ -80,38 +71,46 @@ def run(argv)
   setup_logger(options[:log_level])
   $logger.debug(options)
   $logger.debug(argv)
-  fqf = argv[0]
-  fqr = argv[1]
-  out_prefix = argv[2]
-  if fqf =~ /\.gz$/
-    num_reads = `zcat #{fqf} | wc -l`.to_i/4
-    fqf_file = Zlib::GzipReader.new(File.open(fqf))
-    fqr_file = Zlib::GzipReader.new(File.open(fqr))
+  fq = argv[0]
+  out = argv[1]
+  if fq =~ /\.gz$/
+    fq_file = Zlib::GzipReader.new(File.open(fq))
   else
-    num_reads = `wc -l #{fqf}`.to_i/4
-    fqf_file = File.open(fqf)
-    fqr_file = File.open(fqr)
+    fq_file = File.open(fq)
   end
-  $logger.info("I found #{num_reads} of reads.")
-  cut_off = 1.0/(num_reads.to_f/options[:n])
-  subf = File.open(out_prefix + "_fwd.fq",'w')
-  subr = File.open(out_prefix + "_rev.fq",'w')
-  rec_no = 0
-  while !fqf_file.eof?
-    if rand() > cut_off
-      for i in (0..3)
-        fqf_file.readline
-        fqr_file.readline
+  out_file = File.open(out,'w')
+  i = 0
+  while !fq_file.eof?
+    line = fq_file.readline
+    line.chomp!
+    case i
+    when 0
+      if line =~ /^@/
+        out_file.puts line
+      else
+        $logger.error("LINE: \"#{line}\" IS NOT AS EXPECTED, IT SHOULD BE THE HEADER LINE")
+        raise RuntimeError, 'FOUND CORRUPTED LINE'
       end
-    else
-      for i in (0..3)
-        subf.puts fqf_file.readline
-        subr.puts fqr_file.readline
+    when 1
+      if line =~ /(a|t|g|c|n)/i && line.length >= options[:n]
+        out_file.puts line[0...options[:n]]
+      else
+        $logger.error("LINE: \"#{line}\" IS NOT AS EXPECTED, IT SHOULD BE THE SEQUENCE")
+        raise RuntimeError, 'FOUND CORRUPTED LINE'
       end
-      rec_no += 1
+    when 2
+      if line =~ /^+/
+        out_file.puts line
+      else
+        $logger.error("LINE: \"#{line}\" IS NOT AS EXPECTED, IT SHOULD BE THE + LINE")
+        raise RuntimeError, 'FOUND CORRUPTED LINE'
+      end
+    when 3
+      i = -1
+      out_file.puts line[0...options[:n]]
     end
+    i += 1
   end
-  $logger.info("Total number of reads: #{rec_no}")
 end
 
 if __FILE__ == $0
