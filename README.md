@@ -26,3 +26,14 @@ A collection used for the SRA normalization scripts.
         -v, --verbose                    Run verbosely
         -V, --version                    Print version
         -d, --debug                      Run in debug mode
+
+
+### Reading xml file obtained from SRA database
+
+    Usage: sra_xml.rb [options] sra.xml statistics
+
+    Read xml file
+
+        -v, --verbose                    Run verbosely
+        -V, --version                    Print version
+        -d, --debug                      Run in debug mode
