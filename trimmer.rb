@@ -80,34 +80,42 @@ def run(argv)
   end
   out_file = File.open(out,'w')
   i = 0
+  read = []
   while !fq_file.eof?
     line = fq_file.readline
     line.chomp!
     case i
     when 0
       if line =~ /^@/
-        out_file.puts line
+        read << line
       else
         $logger.error("LINE: \"#{line}\" IS NOT AS EXPECTED, IT SHOULD BE THE HEADER LINE")
         raise RuntimeError, 'FOUND CORRUPTED LINE'
       end
     when 1
-      if line =~ /(a|t|g|c|n)/i && line.length >= options[:n]
-        out_file.puts line[0...options[:n]]
+      if line =~ /(a|t|g|c|n)/i  
+        if line.length >= options[:n]
+          read << line[0...options[:n]]
+        else
+          valid = false
+        end
       else
         $logger.error("LINE: \"#{line}\" IS NOT AS EXPECTED, IT SHOULD BE THE SEQUENCE")
         raise RuntimeError, 'FOUND CORRUPTED LINE'
       end
     when 2
       if line =~ /^+/
-        out_file.puts line
+        read << line
       else
         $logger.error("LINE: \"#{line}\" IS NOT AS EXPECTED, IT SHOULD BE THE + LINE")
         raise RuntimeError, 'FOUND CORRUPTED LINE'
       end
     when 3
       i = -1
-      out_file.puts line[0...options[:n]]
+      read << line[0...options[:n]]      
+      out_file.puts read.join("\n") if valid
+      valid = true
+      read = []
     end
     i += 1
   end
