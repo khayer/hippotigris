@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'optparse'
 require 'logger'
+# gem install libxml-ruby
 require 'xml'
 
 $logger = Logger.new(STDOUT)
@@ -79,6 +80,22 @@ def run(argv)
   out_file = File.open(out,'w')
   i = 0
   stats = {}
+  attributes = {}
+  experiment_packages.each do |package|
+    sample_attributes = package.find("SAMPLE/SAMPLE_ATTRIBUTES/SAMPLE_ATTRIBUTE")
+    attributes.each_pair do |key, value|
+      value[i] = "-"
+      attributes[key] = value
+    end
+    sample_attributes.each do |sample_attribute|
+      attributes[sample_attribute.find_first("TAG").content.downcase] = Array.new(i,"-") unless attributes[sample_attribute.find_first("TAG").content]
+      attributes[sample_attribute.find_first("TAG").content.downcase][i] = sample_attribute.find_first("VALUE").content
+    end
+    i += 1
+  end
+
+  out_file.puts "srr_num\tlibrary_strategy\tlibrary_selection\tprotocol\t#{attributes.keys.join("\t")}"
+  i = 0
   experiment_packages.each do |package|
     srr_num = package.find_first("RUN_SET/RUN/IDENTIFIERS/PRIMARY_ID").content
     library_strategy = package.find_first("EXPERIMENT/DESIGN/LIBRARY_DESCRIPTOR/LIBRARY_STRATEGY").content
@@ -114,12 +131,19 @@ def run(argv)
     end
 
 
+
+    attris = ""
+    attributes.each_value do |value|
+      attris += "#{value[i]}\t"
+    end
+    i += 1
     #puts lib_contr
-    out_file.puts "#{srr_num}\t#{library_strategy}\t#{library_selection}\t#{protocol}"
+    out_file.puts "#{srr_num}\t#{library_strategy}\t#{library_selection}\t#{protocol}\t#{attris}"
     stats[protocol] ||= 0
     stats[protocol] += 1
   end
   $logger.info(stats)
+  puts i
 end
 
 if __FILE__ == $0
